@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huffman Text & File Compressor</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗜️</text></svg>">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-icon">🗜️</span>
+        <div>
+          <h1>Huffman<span>Compress</span></h1>
+          <p class="subtitle">Lossless Binary File Compression & Decompression</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge">Pure C++ / Python / JS</span>
+        <span class="badge badge-accent">100% Client & Server Ready</span>
+      </div>
+    </header>
+
+    <nav class="mode-tabs">
+      <button id="tabCompress" class="tab-btn active" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Compress File
+      </button>
+      <button id="tabDecompress" class="tab-btn" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path></svg>
+        Decompress File (.bin)
+      </button>
+    </nav>
+
+    <main class="main-card">
+      <!-- COMPRESS SECTION -->
+      <section id="compressSection" class="tab-section active">
+        <div class="drop-zone" id="compressDropZone">
+          <input type="file" id="compressFileInput" class="file-input">
+          <div class="drop-content">
+            <div class="drop-icon">📄</div>
+            <h3>Drag & Drop any file to compress</h3>
+            <p>Supports text, code, logs, and any raw binary files</p>
+            <button class="btn btn-secondary" type="button" onclick="document.getElementById('compressFileInput').click()">Browse Files</button>
+          </div>
+        </div>
+
+        <div id="compressDetails" class="file-details hidden">
+          <div class="file-bar">
+            <div class="file-meta">
+              <span class="file-name" id="cFileName">filename.txt</span>
+              <span class="file-size" id="cFileSize">0 KB</span>
+            </div>
+            <button class="btn btn-primary" id="btnRunCompress">
+              <span class="btn-text">Compress Now</span>
+            </button>
+          </div>
+
+          <div id="compressResults" class="results-panel hidden">
+            <div class="stats-grid">
+              <div class="stat-card">
+                <span class="stat-label">Original Size</span>
+                <span class="stat-value" id="cOrigSize">0 B</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Compressed Size</span>
+                <span class="stat-value highlight" id="cCompSize">0 B</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Space Saved</span>
+                <span class="stat-value positive" id="cSavings">0%</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Compression Ratio</span>
+                <span class="stat-value" id="cRatio">0.00x</span>
+              </div>
+            </div>
+
+            <div class="action-bar">
+              <button class="btn btn-success btn-lg" id="btnDownloadCompressed">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download Compressed File (.bin)
+              </button>
+            </div>
+
+            <!-- Codes Preview -->
+            <div class="code-table-container">
+              <details>
+                <summary>View Generated Huffman Codes (<span id="cUniqueChars">0</span> unique symbols)</summary>
+                <div class="table-wrap">
+                  <table class="code-table">
+                    <thead>
+                      <tr>
+                        <th>Symbol</th>
+                        <th>Byte / ASCII</th>
+                        <th>Frequency</th>
+                        <th>Huffman Code</th>
+                        <th>Bits</th>
+                      </tr>
+                    </thead>
+                    <tbody id="cCodeTableBody">
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DECOMPRESS SECTION -->
+      <section id="decompressSection" class="tab-section hidden">
+        <div class="drop-zone" id="decompressDropZone">
+          <input type="file" id="decompressFileInput" class="file-input" accept=".bin">
+          <div class="drop-content">
+            <div class="drop-icon">📦</div>
+            <h3>Drag & Drop compressed .bin file</h3>
+            <p>Upload a file previously compressed with this Huffman tool</p>
+            <button class="btn btn-secondary" type="button" onclick="document.getElementById('decompressFileInput').click()">Browse .bin Files</button>
+          </div>
+        </div>
+
+        <div id="decompressDetails" class="file-details hidden">
+          <div class="file-bar">
+            <div class="file-meta">
+              <span class="file-name" id="dFileName">compressed.bin</span>
+              <span class="file-size" id="dFileSize">0 KB</span>
+            </div>
+            <button class="btn btn-primary" id="btnRunDecompress">
+              <span class="btn-text">Decompress Now</span>
+            </button>
+          </div>
+
+          <div id="decompressResults" class="results-panel hidden">
+            <div class="stats-grid">
+              <div class="stat-card">
+                <span class="stat-label">Compressed Input</span>
+                <span class="stat-value" id="dInputSize">0 B</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Restored Size</span>
+                <span class="stat-value highlight" id="dOutputSize">0 B</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Status</span>
+                <span class="stat-value positive">Lossless 100%</span>
+              </div>
+            </div>
+
+            <div class="action-bar">
+              <button class="btn btn-success btn-lg" id="btnDownloadDecompressed">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download Restored File
+              </button>
+            </div>
+
+            <div class="preview-box">
+              <h4>Preview Decoded Content</h4>
+              <textarea id="dPreviewText" readonly placeholder="Text preview will appear here if the file is readable text..."></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div class="footer-info">
+        <p>Built for <strong>HuffManText</strong> &bull; Complete C++ &bull; Python &bull; Web Dev &bull; Zero external bloat</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
